@@ -1,5 +1,4 @@
 import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js';
-import BN from 'bn.js';
 import { CreateConfigParams, CreatePoolParams, SwapParams } from './types';
 import { getCreateConfigInstruction } from './instructions/createConfig';
 import { getSwapInstruction } from './instructions/swap';
@@ -112,8 +111,15 @@ export class VirtualCurveSDK {
         if (configKeypair) {
             transaction.partialSign(configKeypair);
         }
-        const txid = await this.connection.sendTransaction(transaction, [signer, configKeypair]);
-        console.log('Create Config Transaction Hash:', txid);
+        const signature = transaction.signatures[0].signature;
+        if (signature) {
+            console.log('Create Config Transaction Hash:', Buffer.from(signature).toString('base64'));
+        }
+
+        // Uncomment to send transaction to devnet
+        // const txid = await this.connection.sendTransaction(transaction, [signer, configKeypair]);
+        // console.log('Create Config On-Chain Transaction Hash:', txid);
+        // await this.connection.confirmTransaction(txid);
         return transaction;
     }
 
@@ -185,8 +191,15 @@ export class VirtualCurveSDK {
         if (poolKeypair) {
             transaction.partialSign(poolKeypair);
         }
-        const txid = await this.connection.sendTransaction(transaction, [signer, poolKeypair]);
-        console.log('Create Pool Transaction Hash:', txid);
+        const signature = transaction.signatures[0].signature;
+        if (signature) {
+            console.log('Create Pool Transaction Hash:', Buffer.from(signature).toString('base64'));
+        }
+
+        // Uncomment to send transaction to devnet
+        // const txid = await this.connection.sendTransaction(transaction, [signer, poolKeypair]);
+        // console.log('Create Pool On-Chain Transaction Hash:', txid);
+        // await this.connection.confirmTransaction(txid);
         return transaction;
     }
 
@@ -195,14 +208,14 @@ export class VirtualCurveSDK {
      * @param params Swap parameters
      * @returns Object containing swap out amount and minimum swap out amount
      */
-    swapQuote(params: SwapParams): { swapOutAmount: BN; minSwapOutAmount: BN } {
+    swapQuote(params: SwapParams): { swapOutAmount: bigint; minSwapOutAmount: bigint } {
         // Note: This is a simplified calculation. The actual calculation should be implemented
         // based on your specific curve formula and pool state
-        const inputAmount = new BN(params.isExactIn ? params.tokenAAmount.toString() : params.tokenBAmount.toString());
+        const inputAmount = BigInt(params.isExactIn ? params.tokenAAmount.toString() : params.tokenBAmount.toString());
         
         // Example calculation (this should be replaced with actual curve math)
-        const swapOutAmount = inputAmount.mul(new BN(98)).div(new BN(100)); // Assuming 2% fee
-        const minSwapOutAmount = swapOutAmount.mul(new BN(100 - params.slippageTolerance)).div(new BN(100));
+        const swapOutAmount = (inputAmount * BigInt(98)) / BigInt(100); // Assuming 2% fee
+        const minSwapOutAmount = (swapOutAmount * BigInt(100 - params.slippageTolerance)) / BigInt(100);
         
         return {
             swapOutAmount,
@@ -265,8 +278,15 @@ export class VirtualCurveSDK {
         transaction.add(txInstruction);
         const signer = params.authority as unknown as Keypair;
         transaction.partialSign(signer);
-        const txid = await this.connection.sendTransaction(transaction, [signer]);
-        console.log('Swap Transaction Hash:', txid);
+        const signature = transaction.signatures[0].signature;
+        if (signature) {
+            console.log('Swap Transaction Hash:', Buffer.from(signature).toString('base64'));
+        }
+
+        // Uncomment to send transaction to devnet
+        // const txid = await this.connection.sendTransaction(transaction, [signer]);
+        // console.log('Swap On-Chain Transaction Hash:', txid);
+        // await this.connection.confirmTransaction(txid);
         return transaction;
     }
 }

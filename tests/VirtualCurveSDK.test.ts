@@ -69,7 +69,6 @@ describe('VirtualCurveSDK', () => {
                 initialTokenAAmount: 1000000,
                 initialTokenBAmount: 1000000
             });
-            // Transaction created
 
             expect(tx).toBeInstanceOf(Transaction);
             expect(tx.instructions).toHaveLength(1);
@@ -104,9 +103,9 @@ describe('VirtualCurveSDK', () => {
                 isExactIn: true
             });
 
-            expect(quote.swapOutAmount).toBeInstanceOf(BN);
-            expect(quote.minSwapOutAmount).toBeInstanceOf(BN);
-            expect(quote.swapOutAmount.gt(quote.minSwapOutAmount)).toBe(true);
+            expect(typeof quote.swapOutAmount).toBe('bigint');
+            expect(typeof quote.minSwapOutAmount).toBe('bigint');
+            expect(quote.swapOutAmount > quote.minSwapOutAmount).toBe(true);
         });
     });
 
