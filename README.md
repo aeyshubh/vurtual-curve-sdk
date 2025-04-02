@@ -1,6 +1,13 @@
+# What is Virtual Curve ?
+- A mathimatical curve which supports the price and launch of a token is called a virtual curve.
+- Do you know Over 75% of people on Solana have used virtual curve as every token that is launched on `Pump dot fun` is launched on a virtual curve.
+- The virtual curve used by pump fun is called `Step function bonding curve`.
+
 # Virtual Curve TypeScript SDK
 
-This SDK provides a TypeScript interface for interacting with the Virtual Curve program on Solana.
+- This SDK provides a TypeScript interface for interacting with the Virtual Curve program on Solana.
+- Going one step ahead, I have created a CLI to interact with the SDK which can be found under the `cli` directory,
+- A readme is added in the `cli` directory on how to use it.
 
 ## Development
 
@@ -15,6 +22,9 @@ yarn test
 ```
 
 ## Usage
+- The main goal of this SDK is to give easy to use functions to interact with the Virtual curve program of Meteora.
+
+### Create Config
 
 ```typescript
 import { Connection, PublicKey } from '@solana/web3.js';
@@ -54,8 +64,10 @@ const configTx = await sdk.createConfig({
         liquidity: BigInt(0)
     }]
 });
+```
 
-// Create a new pool
+### Create new Pool
+```typescript
 const poolTx = await sdk.createPool({
     config: configAddress as Address<string>,
     tokenA: tokenAAddress as Address<string>,
@@ -65,8 +77,10 @@ const poolTx = await sdk.createPool({
     initialTokenAAmount: 1000000,
     initialTokenBAmount: 1000000
 });
+```
 
-// Get swap quote
+### Get Swap Quote
+```typescript
 const quote = sdk.swapQuote({
     config: 'config_address',
     pool: 'pool_address',
@@ -82,8 +96,10 @@ const quote = sdk.swapQuote({
     slippageTolerance: 1, // 1%
     isExactIn: true
 });
+```
 
-// Execute swap
+### Execute Swap Quote
+```typescript
 const swapTx = await sdk.swap({
     config: 'config_address',
     pool: 'pool_address',
@@ -99,14 +115,9 @@ const swapTx = await sdk.swap({
     slippageTolerance: 1,
     isExactIn: true
 });
-
-```
-#### Constructor
-```typescript
-constructor(connection: Connection, programId: PublicKey)
 ```
 
-#### Methods
+## Methods of VC Sdk
 
 ##### createConfig
 Creates a new configuration for the Virtual Curve program.
