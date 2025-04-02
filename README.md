@@ -119,31 +119,31 @@ const swapTx = await sdk.swap({
 
 ## Methods of VC Sdk
 
-##### createConfig
+#### createConfig
 Creates a new configuration for the Virtual Curve program.
 ```typescript
 async createConfig(params: CreateConfigParams): Promise<Transaction>
 ```
 
-##### createPool
+#### createPool
 Creates a new pool within the Virtual Curve program.
 ```typescript
 async createPool(params: CreatePoolParams): Promise<Transaction>
 ```
 
-##### swapQuote
+#### swapQuote
 Calculates swap quotation.
 ```typescript
 swapQuote(params: SwapParams): { swapOutAmount: BN; minSwapOutAmount: BN }
 ```
 
-##### swap
+#### swap
 Executes a swap within the pool.
 ```typescript
 async swap(params: SwapParams): Promise<Transaction>
 ```
 
-## Types
+## Types/Params
 
 ### CreateConfigParams
 ```typescript
