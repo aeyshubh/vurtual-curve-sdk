@@ -3,6 +3,23 @@ import { Command } from 'commander';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { VirtualCurveSDK } from '../VirtualCurveSDK';
 import { Address, TransactionSigner } from '@solana/kit';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load environment variables
+const envPath = path.resolve(__dirname, '../.env');
+if (fs.existsSync(envPath)) {
+  const envConfig = fs.readFileSync(envPath, 'utf-8');
+  const envVars = envConfig.split('\n').reduce((acc, line) => {
+    const [key, value] = line.split('=');
+    if (key && value) {
+      acc[key.trim()] = value.trim();
+    }
+    return acc;
+  }, {} as Record<string, string>);
+  
+  process.env = { ...process.env, ...envVars };
+}
 
 const program = new Command();
 
@@ -13,7 +30,7 @@ program
 program
   .command('create-config')
   .description('Create a new Virtual Curve configuration')
-  .requiredOption('-a, --authority <keypair>', 'Authority keypair file path')
+  .option('-a, --authority <keypair>', 'Authority keypair file path (or set AUTHORITY_KEYPAIR in .env)')
   .requiredOption('-q, --quote-mint <address>', 'Quote mint address')
   .option('-f, --fee <number>', 'Pool fee percentage', '0.3')
   .option('-m, --mode <number>', 'Collect fee mode', '0')
@@ -28,9 +45,20 @@ program
       const connection = new Connection('https://api.devnet.solana.com');
       const sdk = new VirtualCurveSDK(connection, new PublicKey('virwvN4ee9tWmGoT37FdxZMmxH54m64sYzPpBvXA3ZV'));
       
-      const authorityKeypair = Keypair.fromSecretKey(
-        Buffer.from(JSON.parse(require('fs').readFileSync(options.authority, 'utf-8')))
-      );
+      let authorityKeypair: Keypair;
+      if (process.env.AUTHORITY_KEYPAIR) {
+        authorityKeypair = Keypair.fromSecretKey(
+          Uint8Array.from(
+            JSON.parse(process.env.AUTHORITY_KEYPAIR)
+          )
+        );
+      } else if (options.authority) {
+        authorityKeypair = Keypair.fromSecretKey(
+          Buffer.from(JSON.parse(require('fs').readFileSync(options.authority, 'utf-8')))
+        );
+      } else {
+        throw new Error('No authority keypair provided in .env or command line');
+      }
 
       const tx = await sdk.createConfig({
         authority: authorityKeypair as unknown as TransactionSigner<string>,
@@ -72,7 +100,7 @@ program
   .command('create-pool')
   .description('Create a new Virtual Curve pool')
   .requiredOption('-c, --config <address>', 'Config address')
-  .requiredOption('-a, --authority <keypair>', 'Authority keypair file path')
+  .option('-a, --authority <keypair>', 'Authority keypair file path (or set AUTHORITY_KEYPAIR in .env)')
   .requiredOption('--token-a <address>', 'Token A mint address')
   .requiredOption('--token-b <address>', 'Token B mint address')
   .requiredOption('-p, --provider <keypair>', 'Initial liquidity provider keypair file path')
@@ -83,9 +111,20 @@ program
       const connection = new Connection('https://api.devnet.solana.com');
       const sdk = new VirtualCurveSDK(connection, new PublicKey('virwvN4ee9tWmGoT37FdxZMmxH54m64sYzPpBvXA3ZV'));
       
-      const authorityKeypair = Keypair.fromSecretKey(
-        Buffer.from(JSON.parse(require('fs').readFileSync(options.authority, 'utf-8')))
-      );
+      let authorityKeypair: Keypair;
+      if (process.env.AUTHORITY_KEYPAIR) {
+        authorityKeypair = Keypair.fromSecretKey(
+          Uint8Array.from(
+            JSON.parse(process.env.AUTHORITY_KEYPAIR)
+          )
+        );
+      } else if (options.authority) {
+        authorityKeypair = Keypair.fromSecretKey(
+          Buffer.from(JSON.parse(require('fs').readFileSync(options.authority, 'utf-8')))
+        );
+      } else {
+        throw new Error('No authority keypair provided in .env or command line');
+      }
       
       const providerKeypair = Keypair.fromSecretKey(
         Buffer.from(JSON.parse(require('fs').readFileSync(options.provider, 'utf-8')))
@@ -112,7 +151,7 @@ program
   .description('Execute a swap')
   .requiredOption('-c, --config <address>', 'Config address')
   .requiredOption('-p, --pool <address>', 'Pool address')
-  .requiredOption('-a, --authority <keypair>', 'Authority keypair file path')
+  .option('-a, --authority <keypair>', 'Authority keypair file path (or set AUTHORITY_KEYPAIR in .env)')
   .requiredOption('--user-token <address>', 'User token account')
   .requiredOption('--base-vault <address>', 'Base vault address')
   .requiredOption('--quote-vault <address>', 'Quote vault address')
@@ -128,9 +167,20 @@ program
       const connection = new Connection('https://api.devnet.solana.com');
       const sdk = new VirtualCurveSDK(connection, new PublicKey('virwvN4ee9tWmGoT37FdxZMmxH54m64sYzPpBvXA3ZV'));
       
-      const authorityKeypair = Keypair.fromSecretKey(
-        Buffer.from(JSON.parse(require('fs').readFileSync(options.authority, 'utf-8')))
-      );
+      let authorityKeypair: Keypair;
+      if (process.env.AUTHORITY_KEYPAIR) {
+        authorityKeypair = Keypair.fromSecretKey(
+          Uint8Array.from(
+            JSON.parse(process.env.AUTHORITY_KEYPAIR)
+          )
+        );
+      } else if (options.authority) {
+        authorityKeypair = Keypair.fromSecretKey(
+          Buffer.from(JSON.parse(require('fs').readFileSync(options.authority, 'utf-8')))
+        );
+      } else {
+        throw new Error('No authority keypair provided in .env or command line');
+      }
 
       const tx = await sdk.swap({
         config: options.config as Address<string>,

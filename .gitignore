@@ -21,8 +21,7 @@ lib/
 
 # Environment
 .env
-.env.local
-.env.*.local
+
 
 # OS
 .DS_Store

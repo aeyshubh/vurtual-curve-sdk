@@ -8,9 +8,26 @@ Command-line interface for interacting with the Virtual Curve SDK.
 npm install -g @virtual-curve/cli
 ```
 
-## Example command
+## Configuration
 
+You can configure the CLI using environment variables in a `.env` file:
+
+```bash
+# Authority keypair as array of numbers
+AUTHORITY_KEYPAIR=[1,2,3,...]
+```
+
+## Example Commands
+
+### Using environment variables:
+```bash
+AUTHORITY_KEYPAIR='[67,67,206,67,112,202,2,22,172,47,124,243,173,235,140,147,123,8,189,100,45,243,70,91,98,67,177,158,187,201,73,167,124,122,239,0,1,65,160,138,128,55,136,30,240,107,147,11,12,132,59,158,206,18,92,148,160,240,197,121,80,135,21,154]' yarn cli create-config --quote-mint TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA --fee 0.3
+```
+
+### Using keypair file:
+```bash
 yarn cli create-config --authority keypairs/authority.json --quote-mint TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA --fee 0.3
+```
 
 ### Create Configuration
 
