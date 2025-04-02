@@ -107,6 +107,13 @@ export class VirtualCurveSDK {
         });
         
         transaction.add(instruction);
+        const signer = params.authority as unknown as Keypair;
+        transaction.partialSign(signer);
+        if (configKeypair) {
+            transaction.partialSign(configKeypair);
+        }
+        const txid = await this.connection.sendTransaction(transaction, [signer, configKeypair]);
+        console.log('Create Config Transaction Hash:', txid);
         return transaction;
     }
 
@@ -153,7 +160,33 @@ export class VirtualCurveSDK {
             }
         });
         
-        transaction.add(instruction as unknown as TransactionInstruction);
+        const txInstruction = new TransactionInstruction({
+            keys: Object.entries(instruction.accounts).map(([_, account]) => {
+                const address = (account as any).address;
+                if (address && typeof address === 'object' && '_keypair' in address) {
+                    return {
+                        pubkey: new PublicKey(address._keypair.publicKey),
+                        isSigner: true,
+                        isWritable: true
+                    };
+                }
+                return {
+                    pubkey: new PublicKey(address),
+                    isSigner: true,
+                    isWritable: true
+                };
+            }),
+            programId: this.programId,
+            data: Buffer.from(instruction.data)
+        });
+        transaction.add(txInstruction);
+        const signer = params.authority as unknown as Keypair;
+        transaction.partialSign(signer);
+        if (poolKeypair) {
+            transaction.partialSign(poolKeypair);
+        }
+        const txid = await this.connection.sendTransaction(transaction, [signer, poolKeypair]);
+        console.log('Create Pool Transaction Hash:', txid);
         return transaction;
     }
 
@@ -210,7 +243,30 @@ export class VirtualCurveSDK {
             }
         });
         
-        transaction.add(instruction as unknown as TransactionInstruction);
+        const txInstruction = new TransactionInstruction({
+            keys: Object.entries(instruction.accounts).map(([_, account]) => {
+                const address = (account as any).address;
+                if (address && typeof address === 'object' && '_keypair' in address) {
+                    return {
+                        pubkey: new PublicKey(address._keypair.publicKey),
+                        isSigner: true,
+                        isWritable: true
+                    };
+                }
+                return {
+                    pubkey: new PublicKey(address),
+                    isSigner: true,
+                    isWritable: true
+                };
+            }),
+            programId: this.programId,
+            data: Buffer.from(instruction.data)
+        });
+        transaction.add(txInstruction);
+        const signer = params.authority as unknown as Keypair;
+        transaction.partialSign(signer);
+        const txid = await this.connection.sendTransaction(transaction, [signer]);
+        console.log('Swap Transaction Hash:', txid);
         return transaction;
     }
 }

@@ -46,7 +46,7 @@ describe('VirtualCurveSDK', () => {
                     liquidity: BigInt(0)
                 }]
             });
-            console.log("TX 1 : ",tx);
+            // Transaction created
             expect(tx).toBeInstanceOf(Transaction);
             expect(tx.instructions).toHaveLength(1);
         });
@@ -69,7 +69,7 @@ describe('VirtualCurveSDK', () => {
                 initialTokenAAmount: 1000000,
                 initialTokenBAmount: 1000000
             });
-            console.log("TX 2 : ",tx);
+            // Transaction created
 
             expect(tx).toBeInstanceOf(Transaction);
             expect(tx.instructions).toHaveLength(1);
