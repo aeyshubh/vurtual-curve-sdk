@@ -22,17 +22,19 @@ export class VirtualCurveSDK {
      * @returns Promise resolving to the configuration creation transaction
      */
     async createConfig(params: CreateConfigParams): Promise<Transaction> {
-        const transaction = new Transaction();
+        const { blockhash } = await this.connection.getLatestBlockhash();
+        const transaction = new Transaction({ recentBlockhash: blockhash });
         
         const configKeypair = Keypair.generate();
+        transaction.feePayer = (params.authority as unknown as { publicKey: PublicKey }).publicKey;
         
-        const instruction = getCreateConfigInstruction({
+        const instructionData = getCreateConfigInstruction({
             config: configKeypair as unknown as TransactionSigner<string>,
-            feeClaimer: params.authority.address,
-            owner: params.authority.address,
+            feeClaimer: (params.authority as unknown as { publicKey: PublicKey }).publicKey.toString() as Address<string>,
+            owner: (params.authority as unknown as { publicKey: PublicKey }).publicKey.toString() as Address<string>,
             quoteMint: params.quoteMint,
             payer: configKeypair as unknown as TransactionSigner<string>,
-            eventAuthority: params.authority.address,
+            eventAuthority: (params.authority as unknown as { publicKey: PublicKey }).publicKey.toString() as Address<string>,
             program: VIRTUAL_CURVE_PROGRAM_ADDRESS as Address<string>,
             poolFees: params.poolFeeParameters,
             collectFeeMode: params.collectFeeMode,
@@ -46,8 +48,65 @@ export class VirtualCurveSDK {
             padding: params.padding || [],
             curve: params.liquidityDistributionParameters || []
         });
+
+        const instruction = new TransactionInstruction({
+            keys: instructionData.accounts.map(acc => {
+                if (typeof acc === 'string') {
+                    return {
+                        pubkey: new PublicKey(acc),
+                        isSigner: false,
+                        isWritable: false
+                    };
+                }
+                if (acc instanceof Keypair) {
+                    return {
+                        pubkey: acc.publicKey,
+                        isSigner: true,
+                        isWritable: true
+                    };
+                }
+                if ('publicKey' in acc && acc.publicKey instanceof PublicKey) {
+                    return {
+                        pubkey: acc.publicKey,
+                        isSigner: true,
+                        isWritable: true
+                    };
+                }
+                if ('_keypair' in acc) {
+                    const keypair = acc._keypair as { publicKey: Uint8Array };
+                    if (keypair.publicKey instanceof Uint8Array) {
+                        return {
+                            pubkey: new PublicKey(keypair.publicKey),
+                            isSigner: true,
+                            isWritable: true
+                        };
+                    }
+                }
+                if ('address' in acc) {
+                    const address = acc.address;
+                    if (typeof address === 'object' && '_keypair' in address) {
+                        const keypair = address as { _keypair: { publicKey: Uint8Array } };
+                        return {
+                            pubkey: new PublicKey(keypair._keypair.publicKey),
+                            isSigner: true,
+                            isWritable: true
+                        };
+                    }
+                    if (typeof address === 'string') {
+                        return {
+                            pubkey: new PublicKey(address),
+                            isSigner: false,
+                            isWritable: false
+                        };
+                    }
+                }
+                throw new Error('Invalid account format');
+            }),
+            programId: new PublicKey(instructionData.programAddress),
+            data: Buffer.from(instructionData.data)
+        });
         
-        transaction.add(instruction as unknown as TransactionInstruction);
+        transaction.add(instruction);
         return transaction;
     }
 
@@ -57,9 +116,11 @@ export class VirtualCurveSDK {
      * @returns Promise resolving to the pool creation transaction
      */
     async createPool(params: CreatePoolParams): Promise<Transaction> {
-        const transaction = new Transaction();
+        const { blockhash } = await this.connection.getLatestBlockhash();
+        const transaction = new Transaction({ recentBlockhash: blockhash });
         
         const poolKeypair = Keypair.generate();
+        transaction.feePayer = (params.authority as unknown as { publicKey: PublicKey }).publicKey;
         
         const [tokenAVault] = await PublicKey.findProgramAddress(
             [Buffer.from('token-a-vault'), poolKeypair.publicKey.toBuffer()],
@@ -122,7 +183,9 @@ export class VirtualCurveSDK {
      * @returns Promise resolving to the swap transaction
      */
     async swap(params: SwapParams): Promise<Transaction> {
-        const transaction = new Transaction();
+        const { blockhash } = await this.connection.getLatestBlockhash();
+        const transaction = new Transaction({ recentBlockhash: blockhash });
+        transaction.feePayer = (params.authority as unknown as { publicKey: PublicKey }).publicKey;
         
         const { swapOutAmount, minSwapOutAmount } = this.swapQuote(params);
         
