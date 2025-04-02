@@ -6,13 +6,18 @@
   "main": "dist/index.js",
   "author": "Shubh P",
   "types": "dist/index.d.ts",
+  "bin": {
+    "vc": "./dist/cli/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "cli": "node ./dist/cli/index.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
+    "commander": "^11.1.0",
     "@solana/kit": "^1.0.0",
     "@solana/web3.js": "^1.87.6",
     "bn.js": "^5.2.1"
